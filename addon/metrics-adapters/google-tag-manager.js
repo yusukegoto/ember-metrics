@@ -13,7 +13,7 @@ export default class GoogleTagManager extends BaseAdapter {
 
   // eslint-disable-next-line ember/classic-decorator-hooks
   init() {
-    const { id, dataLayer, envParams } = this.config;
+    const { id, dataLayer, envParams, nonce } = this.config;
     const envParamsString = envParams ? `&${envParams}` : '';
 
     assert(
@@ -23,11 +23,11 @@ export default class GoogleTagManager extends BaseAdapter {
 
     this.dataLayer = dataLayer || 'dataLayer';
 
-    this._injectScript(id, envParamsString);
+    this._injectScript(id, envParamsString, nonce);
   }
 
   // prettier-ignore
-  _injectScript(id, envParamsString) {
+  _injectScript(id, envParamsString, nonce) {
     (function(w, d, s, l, i) {
       w[l] = w[l] || [];
       w[l].push({
@@ -39,6 +39,9 @@ export default class GoogleTagManager extends BaseAdapter {
           dl = l !== 'dataLayer' ? '&l=' + l : '';
       j.async = true;
       j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl + envParamsString;
+      if (nonce) {
+        j.setAttribute('nonce', nonce);
+      }
       f.parentNode.insertBefore(j, f);
     })(window, document, 'script', this.dataLayer, id);
   }
